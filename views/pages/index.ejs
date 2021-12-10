@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+
+    <%- include("../templates/navBar.ejs") %>
+
+    <div class="container">
+      <h1>Car Management</h1>
+      <br/>
+
+      <% if (msg) { %>
+        <div class="alert alert-primary">
+          <%= msg %>
+        </div>
+      <% } %>
+
+
+      <div class="row">
+        <div class="col-8">
+          <%- include("../components/searchBar.ejs", { startYear, model, make }) %>
+          <br/>
+          <%- include("../components/carsList.ejs", { startYear, model, make, cars, currentPage, lastPage }) %>
+        </div>
+        <div class="col-4">
+          <%- include("../components/formCreateCar.ejs", { allMakes, allModels, allRentalBranches })%>
+        </div>
+      </div>
+
+    </div>
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

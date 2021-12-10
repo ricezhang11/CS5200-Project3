@@ -1,0 +1,31 @@
+<% if (lastPage > 2) { %>
+  <nav aria-label="Bookings Pagination">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" href="<%= '/bookings/?startDate=' + startDate + '&page=' + (currentPage - 1) %>">Previous</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="<%= '/bookings/?startDate=' + startDate + '&page=' + 1 %>"><%= 1 %></a>
+      </li>
+      <li>...</li>
+      <% for(let p = Math.max(currentPage-5, 2);
+        p <= Math.min(currentPage+5, lastPage);
+        p+=1) { %>
+        <li class="<%= 'page-item' + ( p === currentPage ? ' active' : '') %>">
+          <a class="page-link" href="<%= '/bookings/?startDate=' + startDate + '&page=' + p %>"><%= p %></a>
+        </li>
+      <% } %>
+      <li>...</li>
+      <li class="page-item">
+        <a class="page-link" href="<%= '/bookings/?startDate=' + startDate + '&page=' + lastPage %>"
+          ><%= lastPage %></a
+        >
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="<%= '/bookings/?startDate=' + startDate  + '&page=' + (currentPage + 1) %>">Next</a>
+      </li>
+    </ul>
+  </nav>
+<% } else { %>
+  <div></div>
+<% } %>

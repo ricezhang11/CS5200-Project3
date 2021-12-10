@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+
+    <%- include("../templates/navBar.ejs") %>
+
+    <div class="container">
+      <h1>Customer Management</h1>
+      <br/>
+
+      <div class="row">
+           <%- include("../components/customerSearchBar.ejs", { times }) %>
+          <br/>
+          <%- include("../components/customersList.ejs", { customers, times, currentPage, lastPage }) %>
+        </div>
+      </div>
+
+    </div>
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

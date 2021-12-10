@@ -1,0 +1,51 @@
+<h2>Add a new car to fleet</h2>
+<form action="/createCar" method="POST">
+  <div>
+    <label class="form-label">
+      Service start year:
+      <input class="form-control" type="text" name="startYear" />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Current mileage:
+      <input class="form-control" type="text" name="mileage" />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Car make:
+    </label>
+    <select name="makeID" id="carMake">
+      <% for (let make of allMakes) { %>
+        <option value=<%= make._id%>> <%= make.make %> </option>
+      <% } %>
+    </select>
+  </div>
+
+  <div>
+      <label class="form-label">
+        Car model:
+      </label>
+      <select name="modelID" id="carModel">
+        <% for (let model of allModels) { %>
+        <option value=<%= model._id%>> <%= model.model %> </option>
+      <% } %>
+      </select>
+  </div>
+
+  <div>
+      <label class="form-label">
+        Current rental branch:
+      </label>
+      <select name="currentRentalBranchID" id="rentalBranch">
+        <% for (let branch of allRentalBranches) { %>
+        <option value=<%= branch._id%>> <%= branch.branchName %>, <%= branch.address %>, <%= branch.city %>, <%= branch.state %> </option>
+      <% } %>
+      </select>
+  </div>
+  <br/>
+  <button class="btn btn-primary" type="submit">Create</button>
+</form>

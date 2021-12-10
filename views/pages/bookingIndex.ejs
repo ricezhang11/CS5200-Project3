@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+
+    <%- include("../templates/navBar.ejs") %>
+
+    <div class="container">
+      <h1>Booking Management</h1>
+      <br/>
+
+      <div class="row">
+           <%- include("../components/bookingSearchBar.ejs", { startDate, endDate }) %>
+          <br/>
+          <%- include("../components/bookingsList.ejs", { bookings, startDate, endDate, currentPage, lastPage }) %>
+        </div>
+      </div>
+
+    </div>
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

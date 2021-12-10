@@ -1,0 +1,27 @@
+<div class="row g-3">
+  <% for (let branch of branches) { %>
+
+    <div class="col-4">
+      <div class="card p-1">
+        <h5 class="card-title"><%= branch.branchName %></h5>
+        <div class="card-text">
+          <div>Address: <%= branch.address %></div>
+          <div>City: <%= branch.city %></div>
+          <div>State: <%= branch.state %></div>
+          <div>Country: <%= branch.country %></div>
+          <div>Manager: <%= branch.branchManager %></div>
+          <div>Revenue: $<%= branch.totalTransaction %></div>
+          <div>
+            <a class="btn btn-outline-primary" href="<%= '/branches/' + branch._id + '/edit' %>">Edit</a>
+            <a class="btn btn-outline-danger" href="<%= '/branches/' + branch._id + '/delete' %>">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <% } %>
+
+
+
+</div>

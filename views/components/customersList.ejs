@@ -1,0 +1,22 @@
+<div class="row g-3">
+  <% for (let customer of customers) { %>
+
+    <div class="col-4">
+      <div class="card p-1">
+        <h5 class="card-title"><%= customer.firstName %> <%= customer.lastName %></h5>
+        <div class="card-text">
+          <div><%= customer.email %></div>
+          <div><%= customer.phoneNumber %></div>
+          <div>
+            <a class="btn btn-outline-primary" href="<%= '/customers/' + customer._id %>">See detail</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <% } %>
+
+ <%- include("./customerPagination.ejs", { times, currentPage, lastPage }) %>
+
+</div>

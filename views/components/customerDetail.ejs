@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+
+    <%- include("../templates/navBar.ejs") %>
+    <br/>
+    <br/>
+    <div class="container">
+      <h2><%= customer.firstName %> <%= customer.lastName %></h2>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Membership status: <%= membershipStatus %></li>
+        <li class="list-group-item">Customer ID: <%= customer._id %></li>
+        <li class="list-group-item">Email: <%= customer.email %></li>
+        <li class="list-group-item">Phone number: <%= customer.phoneNumber %></li>
+        <li class="list-group-item">City: <%= customer.city %></li>
+        <li class="list-group-item">State: <%= customer.state %></li>
+        <li class="list-group-item">Country: <%= customer.country %></li>
+      </ul>
+    </div>
+    <br/>
+    <div class="container">
+      <h2>Booking History</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Transaction amount</th>
+            <th scope="col">Car make</th>
+            <th scope="col">Pick up branch</th>
+            <th scope="col">Return branch</th>
+          </tr>
+        </thead>
+        <tbody>
+           <% for (let booking of bookings) { %>
+              <tr>
+                <td><%= booking.bookingStartDate %></td>
+                <td><%= booking.bookingEndDate %></td>
+                <td>$<%= booking.totalCharge %></td>
+                <td><%= booking.car[0].make %></td>
+                <td><%= booking.pickupRentalBranch[0].branchName %></td>
+                <td><%= booking.returnRentalBranch[0].branchName %></td>
+              </tr>
+           <% } %>
+        </tbody>
+      </table>
+    </div>
+
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

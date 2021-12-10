@@ -1,0 +1,102 @@
+<form
+  action=" <%= '/branches/' + branch._id + '/edit' %>"
+  method="POST"
+>
+
+  <div>
+    <label class="form-label">
+      Branch ID:
+      <input
+        class="form-control"
+        type="text"
+        name="rentalBranchID"
+        value="<%= branch._id %>"
+        disabled
+      />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Branch name:
+      <input
+        class="form-control"
+        type="text"
+        name="branchName"
+        value="<%= branch.branchName %>"
+      />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Address:
+      <input
+        class="form-control"
+        type="text"
+        name="address"
+        value="<%= branch.address %>"
+      />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      City:
+      <input
+        class="form-control"
+        type="text"
+        name="city"
+        value="<%= branch.city %>"
+      />
+    </label>
+  </div>
+
+    <div>
+    <label class="form-label">
+      State:
+      <input
+        class="form-control"
+        type="text"
+        name="state"
+        value="<%= branch.state %>"
+      />
+    </label>
+  </div>
+    <div>
+    <label class="form-label">
+      Country:
+      <input
+        class="form-control"
+        type="text"
+        name="country"
+        value="<%= branch.country %>"
+      />
+    </label>
+  </div>
+    <div>
+    <label class="form-label">
+      Branch manager:
+      <input
+        class="form-control"
+        type="text"
+        name="branchManager"
+        value="<%= branch.branchManager %>"
+      />
+    </label>
+  </div>
+  
+  <br/>
+  
+  <button type="submit" class="btn btn-primary">Edit</button>
+  <a
+    class="btn btn-danger"
+    href="<%= '/branches/' + branch._id + '/delete' %>"
+    >Delete</a
+  >
+  <a
+    class="btn btn-warning"
+    href="<%= '/branches/' %>"
+    >Cancel</a
+  >
+</form>

@@ -1,0 +1,24 @@
+<div class="row g-3">
+  <% for (let car of cars) { %>
+
+    <div class="col-4">
+      <div class="card p-1">
+        <h5 class="card-title"><%= car.make[0].make %></h5>
+        <div class="card-text">
+          <div><%= car.model[0].model %></div>
+          <div><%= car.mileage %> miles</div>
+          <div>service starts from: <%= car.startYear %></div>
+          <div>
+            <a class="btn btn-outline-primary" href="<%= '/cars/' + car._id + '/edit' %>">Edit</a>
+            <a class="btn btn-outline-danger" href="<%= '/cars/' + car._id + '/delete' %>">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  <% } %>
+
+ <%- include("./pagination.ejs", { startYear, model, make, currentPage, lastPage }) %>
+
+</div>

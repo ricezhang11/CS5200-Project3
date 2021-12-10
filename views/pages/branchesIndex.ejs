@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+    <%- include("../templates/navBar.ejs") %>
+
+    <div class="container">
+      <h1>Rental Branch Management</h1>
+      <br />
+      
+      <% if (msg) { %>
+        <div class="alert alert-primary">
+          <%= msg %>
+        </div>
+      <% } %>
+
+      <div class="row">
+        <div class="col-8">
+    
+          <br />
+          <%- include("../components/branchList.ejs", { branches }) %>
+        </div>
+
+        <div class="col-4">
+          <%- include("../components/formCreateBranch.ejs") %>
+        </div>
+       
+      </div>
+    </div>
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

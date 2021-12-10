@@ -1,0 +1,14 @@
+/* Show it is fixed to the top */
+body {
+  min-height: 75rem;
+  padding-top: 4.5rem;
+}
+
+
+.card a {
+  opacity:  0;
+}
+
+.card:hover a, .card a:focus {
+  opacity:  100;
+}

@@ -1,0 +1,115 @@
+<form
+  action=" <%= '/cars/' + car._id + '/edit' %>"
+  method="POST"
+>
+
+  <div>
+    <label class="form-label">
+      Car ID:
+      <input
+        class="form-control"
+        type="text"
+        name="carID"
+        value="<%= car._id %>"
+        disabled
+      />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Service start year:
+      <input
+        class="form-control"
+        type="text"
+        name="startYear"
+        value="<%= car.startYear %>"
+      />
+    </label>
+  </div>
+
+  <div>
+    <label class="form-label">
+      Current mileage:
+      <input
+        class="form-control"
+        type="text"
+        name="mileage"
+        value="<%= car.mileage %>"
+      />
+    </label>
+  </div>
+
+  <div>
+    <% if (car.isAvailable === true)  { %>
+      <label class="form-label">
+      Change the car availability, otherwise choose "Available" (current setting)
+    </label>
+    <% } else { %>
+        <label class="form-label">
+          Change the car availability, otherwise choose "Not Available" (current setting)
+        </label>
+    <% } %> 
+    <br/>
+    <select name="isAvailable" id="availability">
+      <option value="1">Available</option>
+      <option value="0">Not Available</option>
+    </select>
+  </div>
+
+  <br/>
+
+  <div>
+    <label class="form-label">
+      Change the car make, otherwise choose "<%= car.make[0].make %>" (current make)
+    </label>
+    <br/>
+    <select name="makeID" id="carMake">
+      <% for (let make of allMakes) { %>
+        <option value=<%= make._id%>> <%= make.make %> </option>
+      <% } %>
+    </select>
+  </div>
+
+  <br/>
+
+  <div>
+    <label class="form-label">
+      Change the car model, otherwise choose "<%= car.model[0].model %>" (current model)
+    </label>
+    <br/>
+    <select name="modelID" id="carModel">
+      <% for (let model of allModels) { %>
+        <option value=<%= model._id%>> <%= model.model %> </option>
+      <% } %>
+    </select>
+  </div>
+
+  <br/>
+
+  <div>
+    <label class="form-label">
+      Change the current rental branch, otherwise choose "<%= car.currentRentalBranch[0].branchName %>" (current branch)
+      <br/>
+      <select name="currentRentalBranchID" id="rentalBranch">
+        <% for (let branch of allRentalBranches) { %>
+        <option value=<%= branch._id%>> <%= branch.branchName%>, <%= branch.address%>, <%= branch.city%>, <%= branch.state%></option>
+      <% } %>
+      </select>
+    </label>
+  </div>
+
+  <br/>
+  
+  <button type="submit" class="btn btn-primary">Edit</button>
+  <a
+    class="btn btn-danger"
+    href="<%= '/cars/' + car._id + '/delete' %>"
+    >Delete</a
+  >
+  <a
+    class="btn btn-warning"
+    href="<%= '/cars/' %>"
+    >Cancel</a
+  >
+</form>

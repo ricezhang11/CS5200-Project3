@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <%- include("../templates/head.ejs") %>
+  <body>
+    <%- include("../templates/navBar.ejs") %>
+
+    <div class="container">
+      <h1>Edit Branch Information</h1>
+
+      <% if (msg) { %>
+      <div class="alert alert-primary"><%= msg %></div>
+      <% } %> <%- include("../components/formEditBranch.ejs", { branch }) %>
+    </div>
+
+    <%- include("../templates/footer.ejs") %>
+  </body>
+</html>

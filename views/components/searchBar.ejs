@@ -1,0 +1,36 @@
+<form action="/cars/">
+  <h5>Search cars by start year</h5>
+  <div class="input-group">
+    <input
+      class="form-control"
+      type="text"
+      name="startYear"
+      placeholder="Search for cars that start serving after the year...."
+      value="<%= startYear %>"
+    />
+    <button type="submit" class="btn-primary btn">Search</button>
+  </div>
+
+  <br/>
+
+  <h5>Search cars by model and make (case sensitive)</h5>
+  <div class="input-group">
+    <input
+      class="form-control"
+      type="text"
+      name="model"
+      placeholder="Enter a car model"
+      value="<%= model %>"
+    />
+    <input
+      class="form-control"
+      type="text"
+      name="make"
+      placeholder="Enter a car make"
+      value="<%= make %>"
+    />
+
+    <button type="submit" class="btn-primary btn">Search</button>
+  </div>
+  <div> * Please clear previous search criterias before creating a new search</div>
+</form>
