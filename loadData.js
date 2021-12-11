@@ -75,6 +75,8 @@ async function loadCar() {
         isAvailable: isAvailable,
       });
       promises.push(promise);
+      promise = clientRedis.sAdd("allCars", key);
+      promises.push(promise);
     });
 
     Promise.all(promises);
@@ -112,6 +114,8 @@ async function loadCustomer() {
         state: customer.state,
         country: customer.country,
       });
+      promises.push(promise);
+      promise = clientRedis.sAdd("allCustomers", key);
       promises.push(promise);
     });
     Promise.all(promises);
