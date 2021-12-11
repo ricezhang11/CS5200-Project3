@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const myDb = require("../db/myMongoDB.js");
+const myDb = require("../db/myRedisDB.js");
 
 /* GET home page. */
 router.get("/", async function (req, res, next) {

@@ -1,8 +1,15 @@
 // this is the layer where we connect with db
-const sqlite3 = require("sqlite3");
-const { open } = require("sqlite");
 const { MongoClient } = require("mongodb");
+const { createClient } = require("redis");
 const { ObjectId } = require("mongodb");
+
+async function getRedisConnection() {
+  let clientRedis = createClient();
+  clientRedis.on("error", (err) => console.log("Redis Client Error", err));
+  await clientRedis.connect();
+  console.log("redis connected");
+  return clientRedis;
+}
 
 async function getBranches() {
   let client;
@@ -32,90 +39,47 @@ async function getBranches() {
   }
 }
 
-// April -- DONE!!
-// booking collection, pipeline getCustomersBookingMoreThanXTimes
+// April
+// get customer or bookingTimes hashes
 async function getCustomers(times, page, pageSize) {
   let client;
   try {
-    const uri = "mongodb://localhost:27017";
-    client = new MongoClient(uri);
-    await client.connect();
+    client = await getRedisConnection();
 
-    console.log("Connected to Mongo Server");
-
-    console.log("get customers");
-
-    const db = client.db("project2");
-    const customerCollection = db.collection("customer");
-    const bookingCollection = db.collection("booking");
-
-    let result = "";
+    let result = [];
 
     // if we don't have a times variable, we return all customers
     if (times === "") {
-      result = await customerCollection
-        .find({})
-        .skip((page - 1) * pageSize)
-        .limit(pageSize)
-        .toArray();
+      // since all the customer keys are stored in a list, so we can specify
+      // the starting and ending indexes
+      let allCustomersKeys = await client.lRange(
+        "allCustomers",
+        (page - 1) * pageSize,
+        page * pageSize - 1
+      );
+      // console.log(allCustomersKeys);
+      let promises = [];
+      allCustomersKeys.forEach((customerKey) => {
+        let promise = client.hGetAll(customerKey);
+        promises.push(promise);
+      });
+      result = await Promise.all(promises);
       console.log(result);
       return result;
       // otherwise we need to return customers that have booked more than x times
     } else {
-      let query = [
-        {
-          $group: {
-            _id: "$customer",
-            booking_times: {
-              $sum: 1,
-            },
-            sample_booking: {
-              $first: "$$ROOT",
-            },
-          },
-        },
-        {
-          $match: {
-            booking_times: {
-              $gt: parseInt(times),
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: "customer",
-            localField: "sample_booking.customer",
-            foreignField: "_id",
-            as: "customer",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $arrayElemAt: ["$customer", 0],
-            },
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-
-      result = await bookingCollection.aggregate(query).toArray();
+      // result = await bookingCollection.aggregate(query).toArray();
       // console.log("result is:", result);
-      return result;
+      // return result;
     }
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
-// April -- DONE!!
+// April
 async function getCars(startYear, model, make, page, pageSize) {
   console.log("get cars", startYear, model, make);
 
@@ -311,7 +275,7 @@ async function getCars(startYear, model, make, page, pageSize) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getAllCarMake() {
   console.log("get all car makes in database");
   let client;
@@ -339,7 +303,7 @@ async function getAllCarMake() {
   }
 }
 
-// April -- DONE!!
+// April
 async function getAllCarModel() {
   console.log("get all car models in database");
   let client;
@@ -367,7 +331,7 @@ async function getAllCarModel() {
   }
 }
 
-// April -- DONE!!
+// April
 async function getAllRentalBranch() {
   console.log("get all rental branches in database");
   let client;
@@ -538,7 +502,7 @@ async function getBranchCount() {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCustomerCount(times) {
   console.log("get customer count", times);
 
@@ -599,7 +563,7 @@ async function getCustomerCount(times) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCarCount(startYear, model, make) {
   console.log("get car count", startYear, model, make);
 
@@ -783,7 +747,7 @@ async function getCarCount(startYear, model, make) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCarByID(carID) {
   console.log("get car by ID", carID);
 
@@ -878,7 +842,7 @@ async function getBranchByID(rentalBranchID) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCustomerByID(customerID) {
   console.log("get customer by ID", customerID);
 
@@ -909,7 +873,7 @@ async function getCustomerByID(customerID) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCustomerMembershipStatus(customerID) {
   console.log("get customer membership status", customerID);
 
@@ -983,7 +947,7 @@ async function getCustomerMembershipStatus(customerID) {
   }
 }
 
-// April -- DONE!!
+// April
 async function getCustomerBookingHistory(customerID) {
   console.log("get customer booking history", customerID);
 
@@ -1059,7 +1023,7 @@ async function getCustomerBookingHistory(customerID) {
   }
 }
 
-// April -- DONE!!
+// April
 async function updateCarByID(carID, car) {
   console.log("update car by id", carID, car);
 
@@ -1106,7 +1070,7 @@ async function updateCarByID(carID, car) {
   }
 }
 
-// April -- DONE!!
+// April
 async function deleteCarByID(carID) {
   console.log("delete car by ID", carID);
 
@@ -1138,7 +1102,7 @@ async function deleteCarByID(carID) {
   }
 }
 
-// April -- DONE!!
+// April
 async function createCar(car) {
   let client;
   let result;
