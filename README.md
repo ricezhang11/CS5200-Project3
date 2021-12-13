@@ -32,30 +32,6 @@ Please see file: Project_docs/businessRequirement.pdf
 4. Once you have the mongod server running, run the command ```mongorestore -d project2 ~/Desktop/project2``` (change the path to the <strong>unzipped file</strong> as needed). Open your MongoDB Compass application, connect to localhost:27017 and you should see a new database called project2 has been created and there're 6 collections in it (see sample picture below).  
 ![](Project_docs/Diagrams/db.png)
 
-
-## 5 queries we wrote for the database
-Files for the queries: Project_docs/queries
-Screenshots of the run results of these 5 queries  
-  
-query 1    
-![](Project_docs/Diagrams/ex1.png)
-
-  <img width="1003" alt="Screen Shot 2021-11-23 at 2 14 24 PM" src="https://user-images.githubusercontent.com/90733899/143137766-639e21ba-8485-4d3d-b3c1-5db4d4124f44.png">
-
-query 2  
-![](Project_docs/Diagrams/ex2.png)
-  <img width="1123" alt="Screen Shot 2021-11-23 at 2 14 43 PM" src="https://user-images.githubusercontent.com/90733899/143137784-213570ed-1204-40f6-9c3e-3d213e0c7525.png">
-
-query 3  
-![](Project_docs/Diagrams/ex3.png)
-  <img width="683" alt="Screen Shot 2021-11-23 at 2 15 03 PM" src="https://user-images.githubusercontent.com/90733899/143137801-b591aa2a-314e-47b8-81b0-8fea4a103ee8.png">
-
-query 4  
-![](Project_docs/Diagrams/query4.png)
-  
-query 5  
-![](Project_docs/Diagrams/query5.png)
-
 ## Mongo Collections and sample JSON
 
 We’ll have 6 collections -- Car, Customer, Booking, RentalBranch, CarModel, CarMake. We choose to use references to store the relationship between data, like the example JSONs below.
