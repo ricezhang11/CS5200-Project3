@@ -105,12 +105,9 @@ We set up the Github repo together and both worked on uploading files into the r
 In terms of project implementation, the work is splitted as below:  
   
 @Bugu Wu implemented:
-1. CRUD operations of Rental Branch  
-2. Implemented rental branch search:  
-   a. Filter top K rental ranches based on their transaction amount   
-4. Implemented booking analysis:  
-   a. Filter bookings by start/end date  
-   b. Filter bookings by car make/category
+1. CRUD operations of Rental Branch
+2. Implement latest edited branch 
+
          
 @April Zhang implemented:
 1. CRUD operations of Car  
