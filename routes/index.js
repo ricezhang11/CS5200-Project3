@@ -72,8 +72,10 @@ router.get("/branches", async (req, res, next) => {
   try {
     let total = await myDb.getBranchCount();
     let branches = await myDb.getBranches();
+    let latestBranch = await myDb.getLatestBranch();
     res.render("./pages/branchesIndex", {
       branches,
+      latestBranch,
       msg,
       currentPage: page,
       lastPage: Math.ceil(total / pageSize),
@@ -231,7 +233,7 @@ router.get("/branches/:rentalBranchID/delete", async (req, res, next) => {
     let deletedBranch = await myDb.deleteBranchByID(rentalBranchID);
     console.log("delete", deletedBranch);
 
-    if (deletedBranch && deletedBranch.changes === 1) {
+    if (deletedBranch) {
       res.redirect("/branches/?msg=Deleted");
     } else {
       res.redirect("/branches/?msg=Error Deleting");
@@ -268,11 +270,12 @@ router.post("/branches/:rentalBranchID/edit", async (req, res, next) => {
 
   try {
     let updatedBranch = await myDb.updateBranchByID(rentalBranchID, branch);
-    console.log("update", updatedBranch);
+    console.log("updated", updatedBranch);
 
-    if (updatedBranch && updatedBranch.changes === 1) {
+    if (updatedBranch) {
       res.redirect("/branches/?msg=Updated");
     } else {
+      console.log(updatedBranch.changes);
       res.redirect("/branches/?msg=Error Updating");
     }
   } catch (err) {

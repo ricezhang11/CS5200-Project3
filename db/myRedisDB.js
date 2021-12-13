@@ -26,11 +26,8 @@ async function getBranches() {
     const branchCollection = db.collection("rentalBranch");
 
     let result = "";
-
-    // if we don't have a topK variable, we return all
-
     result = await branchCollection.find({}).toArray();
-    console.log(result);
+    // console.log(result);
     return result;
   } catch (err) {
     console.log(err);
@@ -1174,19 +1171,21 @@ async function createBranch(branch) {
 async function updateBranchByID(rentalBranchID, branch) {
   console.log("update branch by id", rentalBranchID, branch);
 
-  let client;
+  let mongoClient;
   let result;
-
+  let redisClient;
   try {
     const uri = "mongodb://localhost:27017";
 
-    client = new MongoClient(uri);
+    mongoClient = new MongoClient(uri);
 
-    await client.connect();
+    await mongoClient.connect();
 
     console.log("Connected to Mongo Server");
 
-    const db = client.db("project2");
+    redisClient = await getRedisConnection();
+
+    const db = mongoClient.db("project2");
     const branchCollection = db.collection("rentalBranch");
 
     result = await branchCollection.updateOne(
@@ -1202,13 +1201,20 @@ async function updateBranchByID(rentalBranchID, branch) {
         },
       }
     );
-
+    if (result) {
+      const mills = Date.now();
+      await redisClient.zAdd("car:latestBranch", {
+        score: mills,
+        value: rentalBranchID,
+      });
+    }
     console.log(result);
     return result;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await mongoClient.close();
+    await redisClient.quit();
   }
 }
 
@@ -1216,31 +1222,61 @@ async function updateBranchByID(rentalBranchID, branch) {
 async function deleteBranchByID(rentalBranchID) {
   console.log("delete branch by ID", rentalBranchID);
 
-  let client;
+  let mongoClient;
   let result;
+  let redisClient;
 
   try {
     const uri = "mongodb://localhost:27017";
 
-    client = new MongoClient(uri);
+    mongoClient = new MongoClient(uri);
 
-    await client.connect();
+    await mongoClient.connect();
 
     console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
+    redisClient = await getRedisConnection();
+    const db = mongoClient.db("project2");
     const rentalCollection = db.collection("rentalBranch");
 
     result = await rentalCollection.deleteOne({
       _id: ObjectId(rentalBranchID),
     });
     console.log(result);
+    await redisClient.zRem("car:latestBranch", rentalBranchID);
+
     return result;
     // this is the query body
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await mongoClient.close();
+  }
+}
+
+async function getLatestBranch() {
+  let client;
+  try {
+    client = await getRedisConnection();
+
+    let allBranchesID = await client.zRangeWithScores(
+      "car:latestBranch",
+      0,
+      -1
+    );
+    if (allBranchesID.length == 0) {
+      console.log("no latest branch id");
+      let branches = await getBranches();
+      return branches[branches.length - 1];
+    } else {
+      var id = allBranchesID[allBranchesID.length - 1].value;
+      console.log("latest branch id is", id);
+      let branch = await getBranchByID(id);
+      return branch;
+    }
+  } catch (err) {
+    console.log(err);
+  } finally {
+    await client.quit();
   }
 }
 
@@ -1266,3 +1302,4 @@ module.exports.getBookingCount = getBookingCount;
 module.exports.getAllCarMake = getAllCarMake;
 module.exports.getAllCarModel = getAllCarModel;
 module.exports.getAllRentalBranch = getAllRentalBranch;
+module.exports.getLatestBranch = getLatestBranch;
