@@ -144,7 +144,6 @@ async function getAllCarMake() {
   try {
     client = await getRedisConnection();
     let allCarMakes = await client.lRange("allCarMakes", 0, -1);
-    console.log(allCarMakes);
     return allCarMakes;
   } catch (err) {
     console.log(err);
@@ -161,7 +160,6 @@ async function getAllCarModel() {
   try {
     client = await getRedisConnection();
     let allCarModels = await client.lRange("allCarModels", 0, -1);
-    console.log(allCarModels);
     return allCarModels;
   } catch (err) {
     console.log(err);
@@ -178,7 +176,6 @@ async function getAllRentalBranch() {
   try {
     client = await getRedisConnection();
     let allRentalBranches = await client.lRange("allRentalBranches", 0, -1);
-    console.log(allRentalBranches);
     return allRentalBranches;
   } catch (err) {
     console.log(err);
@@ -352,13 +349,7 @@ async function getCustomerCount(times) {
         numberOfCustomersWithBookingMoreThanTTimes += customers.length;
         t += 1;
       }
-      console.log(
-        "there are",
-        numberOfCustomersWithBookingMoreThanTTimes,
-        "that have booked more than",
-        times,
-        "times"
-      );
+
       return numberOfCustomersWithBookingMoreThanTTimes;
     }
   } catch (err) {
@@ -489,117 +480,83 @@ async function getCustomerBookingHistory(customerID) {
   }
 }
 
-// April
+// April --- DONE!
 async function updateCarByID(carID, car) {
   console.log("update car by id", carID, car);
 
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
+    console.log("debug rental branch", car.currentRentalBranch);
+    await client.hSet(`car:${carID}`, {
+      isAvailable: car.isAvailable,
+      currentRentalBranch: car.currentRentalBranch,
+      model: car.model,
+      make: car.make,
+      startYear: car.startYear,
+      milage: car.milage,
+      id: carID,
+    });
 
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    let isAvailable = false;
-    if (car.isAvailable === "1") {
-      isAvailable = true;
-    }
-
-    result = await carCollection.updateOne(
-      { _id: ObjectId(carID) },
-      {
-        $set: {
-          isAvailable: isAvailable,
-          currentRentalBranch: ObjectId(car.currentRentalBranchID),
-          model: ObjectId(car.modelID),
-          make: ObjectId(car.makeID),
-          startYear: car.startYear,
-          mileage: car.mileage,
-        },
-      }
-    );
-
-    console.log(result);
-    return result;
+    let updatedCar = await client.hGetAll(`car:${carID}`);
+    console.log(updatedCar);
+    return updatedCar;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
-// April
+// April --- DONE!
 async function deleteCarByID(carID) {
   console.log("delete car by ID", carID);
 
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
 
-    client = new MongoClient(uri);
+    let deletedCar = await client.hGetAll(`car:${carID}`);
 
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    result = await carCollection.deleteOne({
-      _id: ObjectId(carID),
-    });
-    console.log(result);
-    return result;
-    // this is the query body
+    await client.del(`car:${carID}`);
+    await client.lRem("allCars", 1, `car:${carID}`);
+    console.log(deletedCar);
+    return deletedCar;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
-// April
+// April -- DONE!
 async function createCar(car) {
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
 
-    client = new MongoClient(uri);
+    let newCarID = Date.now();
 
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    result = await carCollection.insertOne({
-      currentRentalBranch: ObjectId(car.currentRentalBranchID),
-      make: ObjectId(car.makeID),
-      model: ObjectId(car.modelID),
+    let result = await client.hSet(`car:${newCarID}`, {
+      currentRentalBranch: car.currentRentalBranch,
+      make: car.make,
+      model: car.model,
       startYear: car.startYear,
-      mileage: car.mileage,
-      isAvailable: true,
+      milage: car.milage,
+      isAvailable: "1",
+      id: newCarID,
     });
 
+    await client.lPush("allCars", `car:${newCarID}`);
     console.log(result);
     return result;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 

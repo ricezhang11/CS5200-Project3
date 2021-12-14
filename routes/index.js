@@ -176,7 +176,6 @@ router.get("/cars/:carID/edit", async (req, res, next) => {
 router.post("/cars/:carID/edit", async (req, res, next) => {
   const carID = req.params.carID;
   const car = req.body;
-
   try {
     let updatedCar = await myDb.updateCarByID(carID, car);
     console.log("update", updatedCar);

@@ -20,7 +20,7 @@
     </label>
     <select name="make" id="carMake">
       <% for (let make of allMakes) { %>
-        <option value=<%= make%>> <%= make %> </option>
+        <option value=<%= make %>> <%= make %> </option>
       <% } %>
     </select>
   </div>
@@ -31,7 +31,7 @@
       </label>
       <select name="model" id="carModel">
         <% for (let model of allModels) { %>
-        <option value=<%= model%>> <%= model %> </option>
+        <option value=<%= model %>> <%= model %> </option>
       <% } %>
       </select>
   </div>
@@ -42,7 +42,7 @@
       </label>
       <select name="currentRentalBranch" id="rentalBranch">
         <% for (let branch of allRentalBranches) { %>
-        <option value=<%= branch%>> <%= branch %> </option>
+        <option value="<%= branch %>"> <%= branch %> </option>
       <% } %>
       </select>
   </div>

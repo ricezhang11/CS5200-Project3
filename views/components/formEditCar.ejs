@@ -86,14 +86,13 @@
   </div>
 
   <br/>
-
   <div>
     <label class="form-label">
       Change the current rental branch, otherwise choose "<%= car.currentRentalBranch %>" (current branch)
       <br/>
       <select name="currentRentalBranch" id="rentalBranch">
         <% for (let branch of allRentalBranches) { %>
-        <option value=<%= branch%>> <%= branch %> </option>
+        <option value="<%= branch %>"> <%= branch %> </option>
       <% } %>
       </select>
     </label>
