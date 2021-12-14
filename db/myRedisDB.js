@@ -39,7 +39,7 @@ async function getBranches() {
   }
 }
 
-// April
+// April --- DONE!
 // get customer or bookingTimes hashes
 async function getCustomers(times, page, pageSize) {
   let client;
@@ -842,108 +842,24 @@ async function getBranchByID(rentalBranchID) {
   }
 }
 
-// April
+// April -- DONE!
 async function getCustomerByID(customerID) {
   console.log("get customer by ID", customerID);
 
   let client;
   let result;
+
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
 
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const customerCollection = db.collection("customer");
-
-    result = await customerCollection
-      .find({ _id: ObjectId(customerID) })
-      .toArray();
-    console.log("result is", result[0]);
+    result = await client.hGetAll(`customer:${customerID}`);
+    console.log("result is", result);
     // takes the first element because _id should be the unique identifier for each customer
-    return result[0];
+    return result;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
-  }
-}
-
-// April
-async function getCustomerMembershipStatus(customerID) {
-  console.log("get customer membership status", customerID);
-
-  let client;
-  let result;
-
-  try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const bookingCollection = db.collection("booking");
-
-    const query = [
-      {
-        $group: {
-          _id: "$customer",
-          total_spending_of_current_customer: {
-            $sum: "$totalCharge",
-          },
-        },
-      },
-      {
-        $match: {
-          _id: ObjectId(customerID),
-        },
-      },
-      {
-        $addFields: {
-          membership: {
-            $switch: {
-              branches: [
-                {
-                  case: {
-                    $gte: ["$total_spending_of_current_customer", 6000],
-                  },
-                  then: "gold membership",
-                },
-                {
-                  case: {
-                    $gte: ["$total_spending_of_current_customer", 4000],
-                  },
-                  then: "silver membership",
-                },
-                {
-                  case: {
-                    $gte: ["$total_spending_of_current_customer", 2000],
-                  },
-                  then: "bronze membership",
-                },
-              ],
-              default: "None",
-            },
-          },
-        },
-      },
-    ];
-
-    result = await bookingCollection.aggregate(query).toArray();
-    console.log("membership result", result[0]["membership"]);
-    return result[0]["membership"];
-  } catch (err) {
-    console.log(err);
-  } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
@@ -955,71 +871,24 @@ async function getCustomerBookingHistory(customerID) {
   let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
 
-    client = new MongoClient(uri);
+    result = await client.sMembers(`customer:${customerID}:bookings`);
+    console.log("booking history is:", result);
 
-    await client.connect();
+    let promises = [];
+    result.forEach((bookingKey) => {
+      let promise = client.hGetAll(bookingKey);
+      promises.push(promise);
+    });
 
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const bookingCollection = db.collection("booking");
-
-    const query = [
-      {
-        $lookup: {
-          from: "customer",
-          localField: "customer",
-          foreignField: "_id",
-          as: "customer",
-        },
-      },
-      {
-        $match: {
-          "customer.0._id": ObjectId(customerID),
-        },
-      },
-      {
-        $lookup: {
-          from: "rentalBranch",
-          localField: "pickupRentalBranch",
-          foreignField: "_id",
-          as: "pickupRentalBranch",
-        },
-      },
-      {
-        $lookup: {
-          from: "rentalBranch",
-          localField: "returnRentalBranch",
-          foreignField: "_id",
-          as: "returnRentalBranch",
-        },
-      },
-      {
-        $lookup: {
-          from: "car",
-          localField: "car",
-          foreignField: "_id",
-          as: "car",
-        },
-      },
-      {
-        $lookup: {
-          from: "carMake",
-          localField: "car.0.make",
-          foreignField: "_id",
-          as: "car",
-        },
-      },
-    ];
-    result = await bookingCollection.aggregate(query).toArray();
-    console.log(result);
-    return result;
+    let bookings = await Promise.all(promises);
+    console.log(bookings);
+    return bookings;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
@@ -1254,7 +1123,6 @@ module.exports.getCustomers = getCustomers;
 module.exports.getCustomerCount = getCustomerCount;
 module.exports.getCustomerByID = getCustomerByID;
 module.exports.getCustomerBookingHistory = getCustomerBookingHistory;
-module.exports.getCustomerMembershipStatus = getCustomerMembershipStatus;
 module.exports.getBranches = getBranches;
 module.exports.getBranchCount = getBranchCount;
 module.exports.createBranch = createBranch;

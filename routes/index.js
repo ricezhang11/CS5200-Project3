@@ -111,8 +111,6 @@ router.get("/customers/:customerID", async (req, res, next) => {
   try {
     let customer = await myDb.getCustomerByID(customerID);
     let bookings = await myDb.getCustomerBookingHistory(customerID);
-    let membershipStatus =
-      (await myDb.getCustomerMembershipStatus(customerID)) || "None";
 
     console.log("get customer by id", {
       customer,
@@ -121,7 +119,6 @@ router.get("/customers/:customerID", async (req, res, next) => {
     res.render("./components/customerDetail.ejs", {
       customer,
       bookings,
-      membershipStatus,
     });
   } catch (err) {
     next(err);

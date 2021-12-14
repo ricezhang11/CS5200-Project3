@@ -9,8 +9,7 @@
     <div class="container">
       <h2><%= customer.firstName %> <%= customer.lastName %></h2>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">Membership status: <%= membershipStatus %></li>
-        <li class="list-group-item">Customer ID: <%= customer._id %></li>
+        <li class="list-group-item">Customer ID: <%= customer.id %></li>
         <li class="list-group-item">Email: <%= customer.email %></li>
         <li class="list-group-item">Phone number: <%= customer.phoneNumber %></li>
         <li class="list-group-item">City: <%= customer.city %></li>
@@ -27,7 +26,6 @@
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
             <th scope="col">Transaction amount</th>
-            <th scope="col">Car make</th>
             <th scope="col">Pick up branch</th>
             <th scope="col">Return branch</th>
           </tr>
@@ -38,9 +36,8 @@
                 <td><%= booking.bookingStartDate %></td>
                 <td><%= booking.bookingEndDate %></td>
                 <td>$<%= booking.totalCharge %></td>
-                <td><%= booking.car[0].make %></td>
-                <td><%= booking.pickupRentalBranch[0].branchName %></td>
-                <td><%= booking.returnRentalBranch[0].branchName %></td>
+                <td><%= booking.pickupRentalBranch %></td>
+                <td><%= booking.returnRentalBranch %></td>
               </tr>
            <% } %>
         </tbody>

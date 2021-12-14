@@ -68,6 +68,7 @@ async function loadCar() {
         isAvailable = "0";
       }
       let promise = clientRedis.hSet(key, {
+        id: carId,
         startYear: car.startYear,
         model: car.model[0].model,
         make: car.make[0].make,
@@ -75,7 +76,7 @@ async function loadCar() {
         isAvailable: isAvailable,
       });
       promises.push(promise);
-      promise = clientRedis.lPush("allCars", key);
+      promise = clientRedis.rPush("allCars", key);
       promises.push(promise);
     });
 
@@ -106,6 +107,7 @@ async function loadCustomer() {
       let customerId = customer._id.toString();
       let key = `customer:${customerId}`;
       let promise = clientRedis.hSet(key, {
+        id: customerId,
         firstName: customer.firstName,
         lastName: customer.lastName,
         phoneNumber: customer.phoneNumber,
@@ -115,7 +117,7 @@ async function loadCustomer() {
         country: customer.country,
       });
       promises.push(promise);
-      promise = clientRedis.lPush("allCustomers", key);
+      promise = clientRedis.rPush("allCustomers", key);
       promises.push(promise);
     });
     Promise.all(promises);
