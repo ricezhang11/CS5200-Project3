@@ -8,9 +8,10 @@ We aim to develop a web-based management system for a car rental company. It has
 1. clone the project to your local using git clone.
 2. cd into project directory.
 3. populate the MongoDB database using instructions below.
-4. run npm install command to install all necessary packages.
-5. run npm start command.
-6. open your browser and navigate to localhost:3000/ and you should see the "Car Management" page.
+4. run ```npm install``` command to install all necessary packages.
+5. cd into the project directory, run the command ```node loadData.js``` (assuming you have Redis set up in your local) and this will populate your local Redis database with the data structures that you'll need to run the application. loadData.js contains the script to import data from the MongoDB database and export them into the Redis database. Proceed to the next step only if this step has been successfully completed. 
+6. run npm start command.
+7. open your browser and navigate to localhost:3000/ and you should see the "Car Management" page.
 
 ## UML Diagram
 https://lucid.app/lucidchart/722ed355-65d1-47df-9cc8-3ba5faa57deb/edit?beaconFlowId=341BAFE5E164E51C&invitationId=inv_6ba983b6-83d2-4e74-866d-5fbff519bbd8&page=0_0#
@@ -32,70 +33,72 @@ Please see file: Project_docs/businessRequirement.pdf
 4. Once you have the mongod server running, run the command ```mongorestore -d project2 ~/Desktop/project2``` (change the path to the <strong>unzipped file</strong> as needed). Open your MongoDB Compass application, connect to localhost:27017 and you should see a new database called project2 has been created and there're 6 collections in it (see sample picture below).  
 ![](Project_docs/Diagrams/db.png)
 
-## Mongo Collections and sample JSON
+## Redis data structured used in this project
+Multiple Redis data structures are used for this project. 
+1. Each car, customer, booking has their own hashes. 
 
-We’ll have 6 collections -- Car, Customer, Booking, RentalBranch, CarModel, CarMake. We choose to use references to store the relationship between data, like the example JSONs below.
-
-JSON examples
+For car, the key is in the format of car:carID
+Sample car hash
 <pre>
-Car collection:  
-{  
-    “_id”: ObjectId(“fdasfdsr34rqfdtewf”),  
-    “currentRentalBranch”: ObjectId(“123123”),  
-    “model”:  ObjectId(“234234”),  
-    “make”: ObjectId(“456456”),  
-    “startYear”: 2020,  
-    “mileage”: 19898， 
-    “isAvailable”: true  
-}  
-  
-Customer collection:  
-{  
-    “_id”: ObjectId(“fdasfdsafdsaf”),  
-    “firstName”: “April”,  
-    “lastName”: “Zhang”,  
-    “phoneNumber”: “8883507088”,  
-    “email”: “email@my.com”,  
-    “city”: “Sunnyvale”,  
-    “state”: “California”,  
-    “country”: “USA”  
-}  
-  
-Booking collection:  
-{  
-    “_id”: ObjectId(“fdsrewrgfds”),  
-    “bookingStartDate”: 2021-08-09T09:55:47.000+00:00,  
-    “bookingEndDate”: 2021-09-19T09:55:47.000+00:00,  
-    “car”: ObjectId(“432432rdwar”),  
-    “customer”: ObjectId(“54f345”),  
-    “totalCharge”: 56.78,  
-    “pickupRentalBranch”: ObjectId(“fda324fdsafdsa”),  
-    “returnRentalBranch”: ObjectId(“432432fdsafdsfds”)  
-}  
-  
-RentalBranch collection:  
-{  
-    "_id"：ObjectId(“123123”),  
-    "branchName": “5th Avenue”,  
-    "address": “5th Avenue”,  
-    "city": “San Jose”,  
-    "state":  “California”,  
-    "country" : “United States”,  
-    "branchManager": “Tim Cook”  
-}  
-
-CarMake collection:  
-{  
-    “_id”：ObjectId(“456456”),  
-    “make”：”Honda”,  
-}  
-  
-CarModel collection:  
-{  
-    “_id”: ObjectId(“543543”),  
-    “model”: “Elantra”  
-}  
+id: 619a97cef6a0af30a000046a,
+startYear: 2006,
+model: Metro,
+make: Isuzu,
+currentRentalBranch: Sonair,
+isAvailable: 1,
+milage: 18730
 </pre>  
+
+For customer, the key is in the format of customer:customerID
+Sample customer hash
+<pre>
+id: 6199e017f6a0af305d0002c4,
+firstName: Caprice,
+lastName: Tebbut,
+phoneNumber: 626-397-8896,
+email: ctebbuty@mail.ru,
+city: Alhambra,
+state: California,
+country: United States
+</pre> 
+
+For booking, the key is in the format of booking:bookingID
+Sample booking hash
+<pre>
+bookingStartDate: Wed Sep 26 2018 03:47:10 GMT-0700 (Pacific Daylight Time),
+bookingEndDate: Wed Nov 14 2018 02:47:10 GMT-0800 (Pacific Standard Time),
+totalCharge: 891.17,
+pickupRentalBranch: Holdlamis,
+returnRentalBranch: Holdlamis
+</pre> 
+
+2. All the cars and customers keys are put into 2 separate lists (with the key "allCars" and "allCustomers"), so that we can render all the cars/customers relatively easy. We just need to iterate over the set and retrieve the individual hashes using the keys. Also, since lists are ordered, the order of car/customer display won't change when we refresh. 
+
+3. Each customer's bookings' keys are put in sets, so that when we render customer details we can retrieve their booking history very fast. The keys of these sets are in the format of "customer:customerID:bookings". 
+
+Sample booking history set with the key "customer:6199e017f6a0af30470002b4:bookings"
+<pre>
+booking:619adf96f6a0af308e0004b7,
+booking:619adf96f6a0af30a00004ad,
+booking:619adf96f6a0af30a300048b
+</pre> 
+
+4. There's also a search functionality in the customer page. For this, I have additional sets set up that contain the customers who have booked with the company larger than X times. 
+The keys of these sets are in the format of "bookingTimes:X"
+
+Sample set with the key "bookingTimes:7" (this set contains the keys of the customers who have booked with the company for exactly 7 times)
+<pre>
+customer:6199e018f6a0af304700030f,
+customer:6199e017f6a0af305d0002f2,
+customer:6199e017f6a0af30470002d6,
+customer:6199e017f6a0af305d0002da,
+customer:6199e018f6a0af305d0002fa,
+customer:6199e017f6a0af305d0002d4
+</pre>
+
+to faciliate this functionality, I also have a string data structure set up to record what is the maximum number of bookings any customer has with the company
+key: "maximumTimes", value: "7"
+
 ## Team contributions
 We splitted our tasks evenly during this assignment. We conducted zoom meetings/online chat/Lucid Chart to put together the business requirement documents, UML and ERD diagrams.  
 For creating testing data and populating the database, April and Bugu discussed and agreed on the data format. April created mock data using Mockaroo and Bugu tried importing the data and QA'ed the data for April.  
@@ -110,10 +113,7 @@ In terms of project implementation, the work is splitted as below:
 
          
 @April Zhang implemented:
-1. CRUD operations of Car  
-2. Implemented car search functionalities:  
-   a. Filter cars by service start year  
-   b. Filter cars that belong to a certain make and model  
+1. Wrote the script that import data from MongoDB to Redis in appropriate data structures
+2. CRUD operations of Car  
 3. Implemented Customer analysis:  
-   a. calculate customers' membership titles based on their total transaction amount.  
    b. search and display customers that have booked with the company for more than certain times.
