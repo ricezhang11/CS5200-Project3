@@ -65,9 +65,33 @@ async function getCustomers(times, page, pageSize) {
       return result;
       // otherwise we need to return customers that have booked more than x times
     } else {
-      // result = await bookingCollection.aggregate(query).toArray();
-      // console.log("result is:", result);
-      // return result;
+      let t = parseInt(times);
+      t += 1;
+      let promises = [];
+      let maximumBookingTimes = await client.get("maximumTimes");
+      let allCustomersWithBookingTimeLessOrEqualToT = [];
+      while (t <= parseInt(maximumBookingTimes)) {
+        let customers = await client.sMembers(`bookingTimes:${t}`);
+        allCustomersWithBookingTimeLessOrEqualToT =
+          allCustomersWithBookingTimeLessOrEqualToT.concat(customers);
+        t += 1;
+      }
+      console.log(
+        "customers with bookings more than",
+        times,
+        "times",
+        allCustomersWithBookingTimeLessOrEqualToT
+      );
+      let customersInRange = allCustomersWithBookingTimeLessOrEqualToT.slice(
+        (page - 1) * pageSize,
+        page * pageSize
+      );
+      customersInRange.forEach((customerKey) => {
+        let promise = client.hGetAll(customerKey);
+        promises.push(promise);
+      });
+      let result = await Promise.all(promises);
+      return result;
     }
   } catch (err) {
     console.log(err);
@@ -499,64 +523,41 @@ async function getBranchCount() {
   }
 }
 
-// April
+// April -- DONE!
 async function getCustomerCount(times) {
   console.log("get customer count", times);
 
   let client;
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const customerCollection = db.collection("customer");
-    const bookingCollection = db.collection("booking");
-    let result;
+    client = await getRedisConnection();
 
     if (times === "") {
-      result = await customerCollection.find({}).count();
-      console.log(result);
-      return result;
+      let numberOfCustomers = await client.lLen("allCustomers");
+      console.log("number of customers is", numberOfCustomers);
+      return numberOfCustomers;
     } else {
-      let query = [
-        {
-          $group: {
-            _id: "$customer",
-            booking_times: {
-              $sum: 1,
-            },
-            sample_booking: {
-              $first: "$$ROOT",
-            },
-          },
-        },
-        {
-          $match: {
-            booking_times: {
-              $gt: parseInt(times),
-            },
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-
-      result = await bookingCollection.aggregate(query).toArray();
-      let count = result[0]["count"];
-      console.log("result is:", result);
-      console.log("count is", count);
-      return result[0]["count"];
+      let t = parseInt(times);
+      t += 1;
+      let maximumBookingTimes = await client.get("maximumTimes");
+      let numberOfCustomersWithBookingMoreThanTTimes = 0;
+      while (t <= parseInt(maximumBookingTimes)) {
+        let customers = await client.sMembers(`bookingTimes:${t}`);
+        numberOfCustomersWithBookingMoreThanTTimes += customers.length;
+        t += 1;
+      }
+      console.log(
+        "there are",
+        numberOfCustomersWithBookingMoreThanTTimes,
+        "that have booked more than",
+        times,
+        "times"
+      );
+      return numberOfCustomersWithBookingMoreThanTTimes;
     }
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 

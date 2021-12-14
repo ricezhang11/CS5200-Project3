@@ -276,7 +276,46 @@ async function loadDataForBookingTimesFilter() {
   }
 }
 
+async function loadMaximumBookingTimes() {
+  let clientMongo;
+  let clientRedis;
+
+  try {
+    clientMongo = await getMongoConnection();
+    clientRedis = await getRedisConnection();
+
+    const db = clientMongo.db("project2");
+    const bookingCollection = db.collection("booking");
+
+    const query = [
+      {
+        $group: {
+          _id: "$customer",
+          times: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          times: -1,
+        },
+      },
+    ];
+
+    let result = await bookingCollection.aggregate(query).toArray();
+    let maximumTimes = result[0].times;
+    await clientRedis.set("maximumTimes", maximumTimes.toString());
+  } catch (err) {
+    console.log(err);
+  } finally {
+    clientMongo.close();
+    clientRedis.quit();
+  }
+}
+
 loadCar();
 loadCustomer();
 loadCustomerBookings();
 loadDataForBookingTimesFilter();
+loadMaximumBookingTimes();
