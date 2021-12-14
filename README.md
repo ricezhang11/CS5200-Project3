@@ -118,10 +118,9 @@ We set up the Github repo together and both worked on uploading files into the r
 In terms of project implementation, the work is splitted as below:  
   
 @Bugu Wu implemented:
-1. CRUD operations of Rental Branch
-2. Implement latest edited branch 
+1. Implement latest edited branch functionality, which utilize CRUD operations with Redis Sorted Set. 
+2. Modified CRUD operations of Rental Branch to interact with Redis and supprt latest edited branch functionality.
 
-         
 @April Zhang implemented:
 1. Wrote the script that import data from MongoDB to Redis in appropriate data structures
 2. CRUD operations of Car  
