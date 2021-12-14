@@ -34,7 +34,7 @@ Please see file: Project_docs/businessRequirement.pdf
 ![](Project_docs/Diagrams/db.png)
 
 ## Redis data structured used in this project
-Multiple Redis data structures are used for this project. We have chosen to implement the CRUD of the cars, search of the customers entirely using the Redis database and structures. A detailed walkthrough of the Redis data structures used in this project is explained below. 
+Multiple Redis data structures are used for this project. We have chosen to implement the CRUD of the cars, search of the customers entirely using the Redis database and structures. We have also decide to add a new feature: Latest Edited Branch to the previous mong project utilize CRUD oprations in Redis. A detailed walkthrough of the Redis data structures used in this project is explained below. 
 
 1. Each car, customer, booking has their own hashes. 
 
@@ -100,10 +100,19 @@ customer:6199e017f6a0af305d0002d4
 to faciliate this functionality, I also have a string data structure set up to record what is the maximum number of bookings any customer has with the company
 key: "maximumTimes", value: "7"
 
+5. There is a Latest Edited Branch functionality in Rental Branches page which will display the details of the latest edited branch. This functionality is realized with CRUD operations in Redis Sortted Set and interacted with already existing mongo db which contains the detailed data of rental branches. The key is "car:latestBranch", rental branch ids as the values and a score of the current edit/delete timestamp. Each time the user edited the rental branch, we create a new value:score record to the sorted set, or if the rental branch id is already there, we update the timestamp. Each time the user delete a rental branch, we delete the it from the sorted set. 
+Sample set with the key "car:latestBranch"
+ <pre>
+ [
+  { value: '6199d5e3f6a0af304700027d', score: 1639381841013 },
+  { value: '6199d5e3f6a0af306400027d', score: 1639422899726 },
+  { value: '6199d5e4f6a0af30a000027d', score: 1639522228711 },
+  { value: '61b91fc2bba99aa23da5d5a6', score: 1639522247947 }
+]
+ </pre>
+
 ## Team contributions
 We splitted our tasks evenly during this assignment. We conducted zoom meetings/online chat/Lucid Chart to put together the business requirement documents, UML and ERD diagrams.  
-For creating testing data and populating the database, April and Bugu discussed and agreed on the data format. April created mock data using Mockaroo and Bugu tried importing the data and QA'ed the data for April.  
-For creating the 5 MongoDB queries, April wrote and ran query 4 and 5. Bugu wrote and ran query 1, 2 and 3.  
 We set up the Github repo together and both worked on uploading files into the repo as well as the write-up for this README.md file
 
 In terms of project implementation, the work is splitted as below:  
