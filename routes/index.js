@@ -11,15 +11,12 @@ router.get("/", async function (req, res, next) {
 // http://localhost:3000/cars?pageSize=24&page=3&q=John
 // display cars -- all cars or fit certain search queries
 router.get("/cars", async (req, res, next) => {
-  const startYear = req.query.startYear || "";
-  const model = req.query.model || "";
-  const make = req.query.make || "";
   const page = +req.query.page || 1;
   const pageSize = +req.query.pageSize || 24;
   const msg = req.query.msg || null;
   try {
-    let total = await myDb.getCarCount(startYear, model, make);
-    let cars = await myDb.getCars(startYear, model, make, page, pageSize);
+    let total = await myDb.getCarCount();
+    let cars = await myDb.getCars(page, pageSize);
     let allMakes = await myDb.getAllCarMake();
     let allModels = await myDb.getAllCarModel();
     let allRentalBranches = await myDb.getAllRentalBranch();
@@ -29,9 +26,6 @@ router.get("/cars", async (req, res, next) => {
       allModels,
       allRentalBranches,
       cars,
-      startYear,
-      model,
-      make,
       msg,
       currentPage: page,
       lastPage: Math.ceil(total / pageSize),
@@ -165,14 +159,6 @@ router.get("/cars/:carID/edit", async (req, res, next) => {
     let allMakes = await myDb.getAllCarMake();
     let allModels = await myDb.getAllCarModel();
     let allRentalBranches = await myDb.getAllRentalBranch();
-
-    console.log("edit car", {
-      car,
-      msg,
-      allModels,
-      allMakes,
-      allRentalBranches,
-    });
 
     res.render("./pages/editCar", {
       car,

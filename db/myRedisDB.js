@@ -100,283 +100,90 @@ async function getCustomers(times, page, pageSize) {
   }
 }
 
-// April
-async function getCars(startYear, model, make, page, pageSize) {
-  console.log("get cars", startYear, model, make);
+// April --- DONE!
+async function getCars(page, pageSize) {
+  console.log("get all cars");
 
   let client;
-  let result;
+  let result = [];
 
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    // if there're no search criteria, return everything
-    if (startYear === "" && model === "" && make === "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result);
-      return result;
-      // search by start year only
-    } else if (startYear !== "") {
-      let query = [
-        {
-          $match: {
-            startYear: {
-              $gt: parseInt(startYear),
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result);
-      return result;
-      // search by both car model and car make
-    } else if (model !== "" && make !== "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "model.0.model": model,
-          },
-        },
-        {
-          $match: {
-            "make.0.make": make,
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      return result;
-      // search by car make only
-    } else if (model === "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "make.0.make": make,
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      return result;
-      // search by car model only
-    } else {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "model.0.model": model,
-          },
-        },
-        {
-          $skip: (page - 1) * pageSize,
-        },
-        {
-          $limit: pageSize,
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      return result;
-    }
+    client = await getRedisConnection();
+    let allCarKeys = await client.lRange(
+      "allCars",
+      (page - 1) * pageSize,
+      page * pageSize - 1
+    );
+    console.log(
+      "page",
+      page,
+      "pageSize",
+      pageSize,
+      "length",
+      allCarKeys.length
+    );
+    let promises = [];
+    allCarKeys.forEach((carKey) => {
+      let promise = client.hGetAll(carKey);
+      promises.push(promise);
+    });
+    result = await Promise.all(promises);
+    return result;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
-// April
+// April -- DONE!
 async function getAllCarMake() {
-  console.log("get all car makes in database");
+  console.log("get all car makes");
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carMakeCollection = db.collection("carMake");
-
-    result = await carMakeCollection.find({}).toArray();
-    console.log(result);
-    return result;
+    client = await getRedisConnection();
+    let allCarMakes = await client.lRange("allCarMakes", 0, -1);
+    console.log(allCarMakes);
+    return allCarMakes;
   } catch (err) {
     console.log(err);
   } finally {
-    client.close();
+    client.quit();
   }
 }
 
-// April
+// April -- DONE!
 async function getAllCarModel() {
-  console.log("get all car models in database");
+  console.log("get all car models");
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carModelCollection = db.collection("carModel");
-
-    result = await carModelCollection.find({}).toArray();
-    console.log(result);
-    return result;
+    client = await getRedisConnection();
+    let allCarModels = await client.lRange("allCarModels", 0, -1);
+    console.log(allCarModels);
+    return allCarModels;
   } catch (err) {
     console.log(err);
   } finally {
-    client.close();
+    client.quit();
   }
 }
 
-// April
+// April -- DONE!
 async function getAllRentalBranch() {
-  console.log("get all rental branches in database");
+  console.log("get all rental branches");
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const rentalBranchCollection = db.collection("rentalBranch");
-
-    result = await rentalBranchCollection.find({}).toArray();
-    console.log(result);
-    return result;
+    client = await getRedisConnection();
+    let allRentalBranches = await client.lRange("allRentalBranches", 0, -1);
+    console.log(allRentalBranches);
+    return allRentalBranches;
   } catch (err) {
     console.log(err);
   } finally {
-    client.close();
+    client.quit();
   }
 }
 
@@ -561,247 +368,39 @@ async function getCustomerCount(times) {
   }
 }
 
-// April
+// April -- DONE!
 async function getCarCount(startYear, model, make) {
   console.log("get car count", startYear, model, make);
 
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
-
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    // if there're no search criteria, return everything
-    if (startYear === "" && model === "" && make === "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result[0]["count"]);
-      return result[0]["count"];
-      // search by start year only
-    } else if (startYear !== "") {
-      let query = [
-        {
-          $match: {
-            startYear: {
-              $gt: parseInt(startYear),
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result[0]["count"]);
-      return result[0]["count"];
-      // search by both car model and car make
-    } else if (model !== "" && make !== "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "model.0.model": model,
-          },
-        },
-        {
-          $match: {
-            "make.0.make": make,
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result[0]["count"]);
-      return result[0]["count"];
-      // search by car make only
-    } else if (model === "") {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "make.0.make": make,
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result[0]["count"]);
-      return result[0]["count"];
-      // search by car model only
-    } else {
-      let query = [
-        {
-          $lookup: {
-            from: "carMake",
-            localField: "make",
-            foreignField: "_id",
-            as: "make",
-          },
-        },
-        {
-          $lookup: {
-            from: "carModel",
-            localField: "model",
-            foreignField: "_id",
-            as: "model",
-          },
-        },
-        {
-          $match: {
-            "model.0.model": model,
-          },
-        },
-        {
-          $count: "count",
-        },
-      ];
-      result = await carCollection.aggregate(query).toArray();
-      console.log(result[0]["count"]);
-      return result[0]["count"];
-    }
+    client = await getRedisConnection();
+    let numberOfCars = await client.lLen("allCars");
+    return numberOfCars;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 
-// April
+// April --- DONE!
 async function getCarByID(carID) {
   console.log("get car by ID", carID);
 
   let client;
-  let result;
 
   try {
-    const uri = "mongodb://localhost:27017";
+    client = await getRedisConnection();
 
-    client = new MongoClient(uri);
-
-    await client.connect();
-
-    console.log("Connected to Mongo Server");
-
-    const db = client.db("project2");
-    const carCollection = db.collection("car");
-
-    const query = [
-      {
-        $match: {
-          _id: ObjectId(carID),
-        },
-      },
-      {
-        $lookup: {
-          from: "carMake",
-          localField: "make",
-          foreignField: "_id",
-          as: "make",
-        },
-      },
-      {
-        $lookup: {
-          from: "carModel",
-          localField: "model",
-          foreignField: "_id",
-          as: "model",
-        },
-      },
-      {
-        $lookup: {
-          from: "rentalBranch",
-          localField: "currentRentalBranch",
-          foreignField: "_id",
-          as: "currentRentalBranch",
-        },
-      },
-    ];
-    result = await carCollection.aggregate(query).toArray();
-    console.log(result[0]);
-    return result[0];
+    let car = await client.hGetAll(`car:${carID}`);
+    console.log(car);
+    return car;
   } catch (err) {
     console.log(err);
   } finally {
-    await client.close();
+    await client.quit();
   }
 }
 // bugu done
@@ -861,7 +460,7 @@ async function getCustomerByID(customerID) {
   }
 }
 
-// April
+// April -- DONE!
 async function getCustomerBookingHistory(customerID) {
   console.log("get customer booking history", customerID);
 

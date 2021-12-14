@@ -74,6 +74,7 @@ async function loadCar() {
         make: car.make[0].make,
         currentRentalBranch: car.currentRentalBranch[0].branchName,
         isAvailable: isAvailable,
+        milage: car.mileage,
       });
       promises.push(promise);
       promise = clientRedis.rPush("allCars", key);
@@ -314,8 +315,93 @@ async function loadMaximumBookingTimes() {
   }
 }
 
+async function loadAllCarMakes() {
+  let clientMongo;
+  let clientRedis;
+
+  try {
+    clientMongo = await getMongoConnection();
+    clientRedis = await getRedisConnection();
+
+    const db = clientMongo.db("project2");
+    const carMakeCollection = db.collection("carMake");
+
+    let result = await carMakeCollection.find({}).toArray();
+    let promises = [];
+
+    result.forEach((make) => {
+      let promise = clientRedis.lPush("allCarMakes", make.make);
+      promises.push(promise);
+    });
+
+    await Promise.all(promises);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    clientMongo.close();
+    clientRedis.quit();
+  }
+}
+
+async function loadAllCarModels() {
+  let clientMongo;
+  let clientRedis;
+  try {
+    clientMongo = await getMongoConnection();
+    clientRedis = await getRedisConnection();
+
+    const db = clientMongo.db("project2");
+    const carModelCollection = db.collection("carModel");
+
+    let result = await carModelCollection.find({}).toArray();
+    let promises = [];
+
+    result.forEach((model) => {
+      let promise = clientRedis.lPush("allCarModels", model.model);
+      promises.push(promise);
+    });
+
+    await Promise.all(promises);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    clientMongo.close();
+    clientRedis.quit();
+  }
+}
+
+async function loadAllRentalBranches() {
+  let clientMongo;
+  let clientRedis;
+  try {
+    clientMongo = await getMongoConnection();
+    clientRedis = await getRedisConnection();
+
+    const db = clientMongo.db("project2");
+    const rentalBranchCollection = db.collection("rentalBranch");
+
+    let result = await rentalBranchCollection.find({}).toArray();
+    let promises = [];
+
+    result.forEach((branch) => {
+      let promise = clientRedis.lPush("allRentalBranches", branch.branchName);
+      promises.push(promise);
+    });
+
+    await Promise.all(promises);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    clientMongo.close();
+    clientRedis.quit();
+  }
+}
+
 loadCar();
 loadCustomer();
 loadCustomerBookings();
 loadDataForBookingTimesFilter();
 loadMaximumBookingTimes();
+loadAllCarMakes();
+loadAllCarModels();
+loadAllRentalBranches();

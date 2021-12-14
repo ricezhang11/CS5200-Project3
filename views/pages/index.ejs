@@ -18,9 +18,7 @@
 
       <div class="row">
         <div class="col-8">
-          <%- include("../components/searchBar.ejs", { startYear, model, make }) %>
-          <br/>
-          <%- include("../components/carsList.ejs", { startYear, model, make, cars, currentPage, lastPage }) %>
+          <%- include("../components/carsList.ejs", { cars, currentPage, lastPage }) %>
         </div>
         <div class="col-4">
           <%- include("../components/formCreateCar.ejs", { allMakes, allModels, allRentalBranches })%>

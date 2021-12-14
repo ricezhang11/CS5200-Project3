@@ -10,7 +10,7 @@
   <div>
     <label class="form-label">
       Current mileage:
-      <input class="form-control" type="text" name="mileage" />
+      <input class="form-control" type="text" name="milage" />
     </label>
   </div>
 
@@ -18,9 +18,9 @@
     <label class="form-label">
       Car make:
     </label>
-    <select name="makeID" id="carMake">
+    <select name="make" id="carMake">
       <% for (let make of allMakes) { %>
-        <option value=<%= make._id%>> <%= make.make %> </option>
+        <option value=<%= make%>> <%= make %> </option>
       <% } %>
     </select>
   </div>
@@ -29,9 +29,9 @@
       <label class="form-label">
         Car model:
       </label>
-      <select name="modelID" id="carModel">
+      <select name="model" id="carModel">
         <% for (let model of allModels) { %>
-        <option value=<%= model._id%>> <%= model.model %> </option>
+        <option value=<%= model%>> <%= model %> </option>
       <% } %>
       </select>
   </div>
@@ -40,9 +40,9 @@
       <label class="form-label">
         Current rental branch:
       </label>
-      <select name="currentRentalBranchID" id="rentalBranch">
+      <select name="currentRentalBranch" id="rentalBranch">
         <% for (let branch of allRentalBranches) { %>
-        <option value=<%= branch._id%>> <%= branch.branchName %>, <%= branch.address %>, <%= branch.city %>, <%= branch.state %> </option>
+        <option value=<%= branch%>> <%= branch %> </option>
       <% } %>
       </select>
   </div>
