@@ -34,7 +34,7 @@ Please see file: Project_docs/businessRequirement.pdf
 ![](Project_docs/Diagrams/db.png)
 
 ## Redis data structured used in this project
-Multiple Redis data structures are used for this project. We have chosen to implement the CRUD of the cars, search of the customers entirely using the Redis database and structures. We have also decide to add a new feature: Latest Edited Branch to the previous mong project utilize CRUD oprations in Redis. A detailed walkthrough of the Redis data structures used in this project is explained below. 
+Multiple Redis data structures are used for this project. We have chosen to implement the CRUD of the cars, search of the customers entirely using the Redis database and structures. We have also decide to add a new feature: Latest Edited Branch to the previous mongo project, which utilized CRUD oprations in Redis and added logics to CRUD operations of rental branches to support iteractions with Redis. A detailed walkthrough of the Redis data structures used in this project is explained below. 
 
 1. Each car, customer, booking has their own hashes. 
 
